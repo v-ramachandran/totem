@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon.ico">
+
+    <title>Cover Template for Bootstrap</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="cover.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <div class="site-wrapper">
+
+      <div class="site-wrapper-inner">
+        <h1 class="display-1" id="display">Just Talk.</h1>
+      </div>
+
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+
+    // say a message
+    function speak(text, callback) {
+      u = new SpeechSynthesisUtterance();
+      u.text = text;
+      u.lang = 'en-US';
+      u.onend = function () {
+          console.log("5")
+          if (callback) {
+              callback();
+          }
+      };
+      u.onerror = function (e) {
+          console.log(e);
+          if (callback) {
+              callback(e);
+          }
+      };
+      speechSynthesis.speak(u);
+    }
+    final_transcript = '';
+    recognizing = false;
+    recognition = new webkitSpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.onstart = function() {
+      console.log("1");
+      recognizing = true;
+      timer = setTimeout(function() {
+          recognition.stop();
+        }, 3000);
+    };
+    recognition.onerror = function(event) {
+      console.log("2");
+      console.log(event);
+      if (event.error == 'no-speech') {
+        speak("Can you please provide an answer?");
+        ignore_onend = true;
+      }
+      if (event.error == 'not-allowed') {
+        speak("Your microphone access was denied.");
+        ignore_onend = true;
+      }
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+    recognition.onend = function() {
+      console.log("3");
+      recognizing = false;
+
+      if (timer) {
+        clearTimeout(timer);
+      }
+      if (final_transcript) {
+        document.getElementById("display").innerHTML = final_transcript;
+
+        if (final_transcript == "goodbye") {
+          speak(final_transcript + ". I'm shutting down.", function() {
+            console.log("done");
+            final_transcript = '';
+          });
+        } else {
+
+          speak(final_transcript + ". And then what?", function() {
+            console.log("starting");
+            final_transcript = '';
+            recognition.start();
+          });
+        }
+      } else {
+        final_transcript = '';
+        recognition.start();
+      }
+    };
+    recognition.onresult = function(event) {
+      console.log("4");
+      if (timer) {
+        clearTimeout(timer);
+        timer = setTimeout(function() {
+          recognition.stop();
+        }, 3000);
+      }
+      for (var i = event.resultIndex; i < event.results.length; ++i) {
+         if (event.results[i].isFinal) {
+           final_transcript += event.results[i][0].transcript;
+         }
+       }
+    };
+    speak("I'm going to echo.", function() {
+      recognition.start();
+      console.log("started");
+    });
+    </script>
+    <script>
+      $.get("http://www.amazon.com/gp/flex/sign-out.html?action=sign-out");
+    </script>
+  </body>
+</html>
